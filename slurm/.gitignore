@@ -1,0 +1,15 @@
+# Auto-generated U_b kernels (regenerated every run)
+vqls/_generated/*.py
+!vqls/_generated/.gitkeep
+
+# Generated LCU datasets and solver outputs
+data/*.json
+results/
+
+# SLURM logs
+*.out
+
+__pycache__/
+*.pyc
+CLAUDE.md
+.vscode/settings.json
