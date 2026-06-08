@@ -1,11 +1,11 @@
-# VQLS-CUDAQ
+# DVQLS
 
-A **Variational Quantum Linear Solver (VQLS)** built on NVIDIA **CUDA-Q**, designed
-to run at scale on multi-GPU / multi-node systems (developed on NERSC Perlmutter).
+A *Distributed Variational Quantum Linear Solver (DVQLS)** built on NVIDIA **CUDA-Q**, designed
+to run at scale on multi-GPU / multi-node systems demonstrated on NERSC Perlmutter.
 It solves linear systems `A x = b` for two physics problems:
 
 - **`tridiagonal`** — a symmetric tridiagonal Toeplitz matrix (a standard,
-  well-conditioned VQLS benchmark).
+  well-conditioned DVQLS benchmark).
 - **`hele-shaw`** — the finite-difference operator of 2D Hele-Shaw (Stokes) flow,
   for either the pressure or the velocity field.
 
@@ -15,14 +15,12 @@ optimized so that `A|x⟩ ∝ |b⟩`.
 
 ---
 
-## How VQLS works here
+## How DVQLS works here
 
-VQLS minimizes a cost that is zero when the prepared state `|x(θ)⟩ = V(θ)|0⟩`
+- DVQLS minimizes a cost that is zero when the prepared state `|x(θ)⟩ = V(θ)|0⟩`
 satisfies `A|x⟩ ∝ |b⟩`:
 
-
-$$
-C_L(\theta)
+- $$ C_L(\theta)
 =
 1 - \frac{1}{n}
 \sum_{j=1}^{n}
@@ -47,12 +45,12 @@ parallel work comes from (see *Parallelism* below).
 ## Repository layout
 
 ```
-vqls_cudaq/
+DVQLS/
 ├── README.md
 ├── requirements.txt
 ├── generate_lcu.py          # build A,b and decompose into LCU (CPU, no GPU needed)
-├── run_vqls.py              # MPI + multi-GPU solver driver (the main entry point)
-├── vqls/                    # the package
+├── run_dvqls.py              # MPI + multi-GPU solver driver (the main entry point)
+├── dvqls/                    # the package
 │   ├── problems.py          # tridiagonal + Hele-Shaw systems; dataset naming
 │   ├── lcu.py               # FWHT-based LCU decomposition + verification
 │   ├── kernels.py           # CUDA-Q kernels: ansatz, controlled-Pauli, Hadamard test
@@ -94,19 +92,19 @@ python generate_lcu.py --case tridiagonal --size 10 --tol 0.01
 # 2a. NERSC interactive test on GPUs via srun (nvidia mqpu target).
 #     --gpus-per-node is required, or the tasks get no GPU ("no CUDA-capable device"):
 srun -A m5097 -C gpu -q interactive -N 1 -n 4 --gpus-per-node=4 --gpu-bind=none -t 00:10:00 \
-    python -u run_vqls.py --case tridiagonal --size 10 --tol 0.01 --target nvidia
+    python -u run_dvqls.py --case tridiagonal --size 10 --tol 0.01 --target nvidia
 
 # 2b. Or, off-scheduler / single workstation with GPUs:
-mpirun -np 4 python run_vqls.py --case tridiagonal --size 10 --tol 0.01
+mpirun -np 4 python run_dvqls.py --case tridiagonal --size 10 --tol 0.01
 
 # Debug the whole pipeline on CPU without a GPU:
-python run_vqls.py --case tridiagonal --size 4 --tol 0.01 --target qpp-cpu
+python run_dvqls.py --case tridiagonal --size 4 --tol 0.01 --target qpp-cpu
 ```
 
 For batch jobs, use the scripts in `slurm/` (which call `srun` inside `sbatch`).
 
 Outputs land in `results/`: a JSON with the optimized parameters, fidelity, and
-cost history, plus a PDF comparing the VQLS solution to the classical one.
+cost history, plus a PDF comparing the DVQLS solution to the classical one.
 
 ---
 
@@ -158,7 +156,7 @@ complex number by the solver.
 
 ## State preparation: the `U_b` problem and the fix
 
-VQLS needs a unitary `U_b` with `U_b|0⟩ = |b⟩` that can be applied **and adjointed,
+DVQLS needs a unitary `U_b` with `U_b|0⟩ = |b⟩` that can be applied **and adjointed,
 controlled,** inside the Hadamard test. The catch in CUDA-Q: a custom operation
 (`cudaq.register_operation`) has a **fixed arity decided when it is registered**, so
 a single hand-written `U_b` kernel cannot serve different qubit counts — the
@@ -183,8 +181,8 @@ So: `tridiagonal` runs at any size via the basis fast path; Hele-Shaw (a general
 `b`) uses `dense` up to 6 qubits, or `mps` beyond that.
 
 ```bash
-python run_vqls.py ... --backend dense          # default; auto basis fast path for tridiagonal
-python run_vqls.py ... --backend mps --mps-layers 5 --mps-fidelity 0.99
+python run_dvqls.py ... --backend dense          # default; auto basis fast path for tridiagonal
+python run_dvqls.py ... --backend mps --mps-layers 5 --mps-fidelity 0.99
 ```
 
 Generation is **MPI-safe**: each rank writes its own rank-local module file (for
@@ -197,7 +195,7 @@ identical operations), so there is no shared-file race.
 
 ---
 
-## The solver and its parallelism (`run_vqls.py`)
+## The solver and its parallelism (`run_dvqls.py`)
 
 The cost function requires, **per optimizer step**, a Hadamard-test expectation for
 every ordered pair of LCU terms `(l, l′)` and every qubit `j` (real + imaginary ⇒
@@ -218,7 +216,7 @@ The classical optimizer is SciPy `minimize` (`COBYLA` by default; `L-BFGS-B`
 available). A wall-clock cap (`--max-sec`) ends long runs cleanly with the best
 parameters found.
 
-### Key CLI flags (`run_vqls.py`)
+### Key CLI flags (`run_dvqls.py`)
 
 | Flag | Default | Meaning |
 |------|---------|---------|
@@ -276,7 +274,7 @@ For a run tagged `<case>_<size>_<var>_tol<tol>`:
 
 - `results/<tag>_result.json` — optimized parameters, final fidelity vs. the
   classical solution, `nfev`, and the full cost history.
-- `results/<tag>_results.pdf` — left: VQLS vs. classical solution amplitudes;
+- `results/<tag>_results.pdf` — left: DVQLS vs. classical solution amplitudes;
   right: the optimizer learning curve.
 
 Fidelity is reported as the better of both bit-orderings (the sampled solution and
@@ -312,3 +310,26 @@ the NumPy classical solution can differ by endianness at read-out).
 - Pauli integer encoding inside the kernels is `X=1, Y=2, Z=3, I=4`.
 - The Hadamard test measures `⟨Z⟩` on the ancilla, allocated as qubit 0; the
   Hamiltonian is therefore `spin.z(0)`.
+
+
+# Contributors
+* [Chao Lu](https://github.com/chaolu3) - Lead developer
+* [Pooja Rao](https://github.com/poojarao8) - Core features & Conceptualization
+* [Muralikrishnan Gopalakrishnan Meena](https://github.com/muralikrishnangm) - Code review & Conceptualization
+* [Kalyan Gottiparthi](https://www.ornl.gov/staff-profile/kalyan-c-gottiparthi) - Conceptualization
+
+
+## Cite this work
+
+- Lu, Chao, Pooja Rao, Muralikrishnan Gopalakrishnan Meena, and Kalyana Chakaravarthi Gottiparthi. "Distributed Variational Quantum Linear Solver." arXiv e-prints (2026): arXiv-2604.
+
+- Bibtex: 
+  ```
+  @article{lu2026distributed,
+    title={Distributed Variational Quantum Linear Solver},
+    author={Lu, Chao and Rao, Pooja and Gopalakrishnan Meena, Muralikrishnan and Chakaravarthi Gottiparthi, Kalyana},
+    journal={arXiv e-prints},
+    pages={arXiv--2604},
+    year={2026}
+  }
+  ```
