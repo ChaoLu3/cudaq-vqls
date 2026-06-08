@@ -3,7 +3,7 @@
 Two backends, both solving the same headache -- a CUDA-Q custom operation has a
 *fixed arity* fixed at registration time, so a single hand-written ``U_b`` kernel
 cannot cover different qubit counts. Here ``U_b`` is generated automatically to
-exactly match ``num_qubits`` and injected into ``vqls.kernels``:
+exactly match ``num_qubits`` and injected into ``dvqls.kernels``:
 
 * ``dense`` : pad |b> to a full 2^n x 2^n unitary (|b> as its first column) and
   register it as one big custom op. Exact, but the dense matrix limits this to
@@ -240,7 +240,7 @@ def _build_mps(b_vec, num_qubits, rank, gen_dir, comm,
 def prepare_b(b_vec, num_qubits, backend="dense", comm=None, gen_dir=None,
               max_num_layers=5, chi_max=512, target_fidelity=0.99):
     """Register the state-prep op(s), generate the matching ``U_b`` kernel, and
-    inject it into ``vqls.kernels``. Call once on every rank before optimizing.
+    inject it into ``dvqls.kernels``. Call once on every rank before optimizing.
 
     Returns the generated ``U_b`` kernel (also reachable as ``kernels.U_b``).
     """

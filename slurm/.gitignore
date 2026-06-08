@@ -1,6 +1,6 @@
 # Auto-generated U_b kernels (regenerated every run)
-vqls/_generated/*.py
-!vqls/_generated/.gitkeep
+dvqls/_generated/*.py
+!dvqls/_generated/.gitkeep
 
 # Generated LCU datasets and solver outputs
 data/*.json

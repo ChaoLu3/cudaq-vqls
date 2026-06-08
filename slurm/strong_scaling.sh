@@ -17,13 +17,13 @@
 #SBATCH -q regular
 #SBATCH -A m5097
 #SBATCH -t 2:00:00
-#SBATCH --job-name=vqls_strong
-#SBATCH --output=vqls_strong_%j.out
+#SBATCH --job-name=dvqls_strong
+#SBATCH --output=dvqls_strong_%j.out
 
 set -euo pipefail
 
-RELEASE_DIR=/global/cfs/cdirs/m5097/Chaol/VQLS_CUDAQ/vqls_cudaq
-CONDA_ENV=/global/cfs/cdirs/m5097/Chaol/VQLS_CUDAQ/.conda
+RELEASE_DIR=/global/cfs/cdirs/m5097/Chaol/DVQLS/DVQLS
+CONDA_ENV=/global/cfs/cdirs/m5097/Chaol/DVQLS/.conda
 
 CASE=tridiagonal
 SIZE=10
@@ -43,6 +43,6 @@ python generate_lcu.py --case "${CASE}" --size "${SIZE}" --tol "${TOL}"
 for TPN in 4 8 16 32; do
     echo "======== strong scaling: ${SLURM_NNODES} nodes x ${TPN} ranks/node ========"
     srun --ntasks-per-node="${TPN}" --gpu-bind=none \
-        python -u run_vqls.py --case "${CASE}" --size "${SIZE}" --tol "${TOL}" \
+        python -u run_dvqls.py --case "${CASE}" --size "${SIZE}" --tol "${TOL}" \
             --backend dense --maxiter "${MAXITER}"
 done

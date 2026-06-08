@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""VQLS solver driver (MPI + multi-GPU, CUDA-Q mqpu).
+"""DVQLS solver driver (MPI + multi-GPU, CUDA-Q mqpu).
 
 Loads an LCU dataset, optimizes a hardware-efficient ansatz to solve A x = b, and
 writes the recovered solution, fidelity, and a results plot.
@@ -16,7 +16,7 @@ Each rank reduces locally, then an MPI all-reduce combines partial sums.
 Run (single node, 4 GPUs)
 -------------------------
     python generate_lcu.py --case tridiagonal --size 10 --tol 0.01
-    mpirun -np 4 python run_vqls.py --case tridiagonal --size 10 --tol 0.01
+    mpirun -np 4 python run_dvqls.py --case tridiagonal --size 10 --tol 0.01
 
 Under SLURM use ``srun`` (see slurm/). One MPI rank per GPU is the usual choice.
 """
@@ -33,8 +33,8 @@ from scipy.optimize import minimize
 import cudaq
 from cudaq import spin
 
-from vqls import kernels, problems, state_prep
-from vqls.utils import MinimizeStopper, fidelity
+from dvqls import kernels, problems, state_prep
+from dvqls.utils import MinimizeStopper, fidelity
 
 PAULI_TO_INT = {"X": 1, "Y": 2, "Z": 3, "I": 4}  # matches kernels.controlled_pauli
 
@@ -170,7 +170,7 @@ def recover_and_report(args, result, num_qubits, matrix, b_vec, cost_history):
     if fid_rev > fid_normal:
         quantum = quantum[::-1]
     fid = max(fid_normal, fid_rev)
-    print(f"Fidelity (VQLS vs classical): {fid:.6f}")
+    print(f"Fidelity (DVQLS vs classical): {fid:.6f}")
 
     os.makedirs(args.out_dir, exist_ok=True)
     tag = problems.dataset_filename(args.case, args.size, args.var, args.tol)[:-5]
@@ -195,7 +195,7 @@ def _plot(args, tag, num_qubits, quantum, classical, cost_history):
     labels = [format(i, f"0{num_qubits}b") for i in range(2 ** num_qubits)]
     x = np.arange(len(labels))
     ax1.bar(x - 0.2, np.abs(classical), 0.4, label="Classical", color="#0071C5")
-    ax1.bar(x + 0.2, np.abs(quantum), 0.4, label="VQLS", color="#76B900")
+    ax1.bar(x + 0.2, np.abs(quantum), 0.4, label="DVQLS", color="#76B900")
     ax1.set_xlabel("Computational basis state")
     ax1.set_ylabel("Amplitude")
     ax1.set_title(f"Solution ({num_qubits} qubits)")

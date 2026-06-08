@@ -1,4 +1,4 @@
-"""VQLS-CUDAQ: a Variational Quantum Linear Solver built on NVIDIA CUDA-Q.
+"""DVQLS: a Variational Quantum Linear Solver built on NVIDIA CUDA-Q.
 
 Public modules
 --------------

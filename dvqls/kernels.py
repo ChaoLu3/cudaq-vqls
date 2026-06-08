@@ -1,4 +1,4 @@
-"""CUDA-Q kernels for VQLS.
+"""CUDA-Q kernels for DVQLS.
 
 The cost function is evaluated with a Hadamard test: for each ordered pair of
 LCU Pauli terms (l, l') we estimate <0| U_b^dag A_l'^dag (Z_j) A_l U_b |0>-type
@@ -6,7 +6,7 @@ overlaps via the ancilla expectation value <Z_ancilla>. The imaginary part is
 obtained by an extra Rz(-pi/2) on the ancilla.
 
 The right-hand-side preparation ``U_b`` is *not* defined here. It is injected at
-runtime as a module global by ``vqls.state_prep`` (dense or MPS backend) because
+runtime as a module global by ``dvqls.state_prep`` (dense or MPS backend) because
 its exact form depends on the qubit count and on ``b``. ``hadamard_test`` and the
 adjoint below resolve ``U_b`` lazily, at trace time, so the global must be set
 before the first call.
@@ -17,7 +17,7 @@ Pauli integer encoding (matches ``controlled_pauli``): X=1, Y=2, Z=3, I=4.
 import cudaq
 import numpy as np
 
-# Right-hand-side state-prep unitary, injected by vqls.state_prep.set_u_b(...).
+# Right-hand-side state-prep unitary, injected by dvqls.state_prep.set_u_b(...).
 U_b = None
 
 
@@ -59,7 +59,7 @@ def ansatz(nq: int, weights: list[float], q: cudaq.qvector):
 @cudaq.kernel
 def hadamard_test(nq: int, part: bool, j: int, weights: list[float],
                   paulis: list[int], paulis2: list[int]):
-    """One Hadamard-test circuit for the VQLS cost.
+    """One Hadamard-test circuit for the DVQLS cost.
 
     ``part``  : False -> real part, True -> imaginary part (adds Rz(-pi/2)).
     ``j``     : qubit index for the controlled-Z; ``j == -1`` skips it, giving

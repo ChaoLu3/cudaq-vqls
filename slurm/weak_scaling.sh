@@ -11,8 +11,8 @@
 
 set -euo pipefail
 
-RELEASE_DIR=/global/cfs/cdirs/m5097/Chaol/VQLS_CUDAQ/vqls_cudaq
-CONDA_ENV=/global/cfs/cdirs/m5097/Chaol/VQLS_CUDAQ/.conda
+RELEASE_DIR=/global/cfs/cdirs/m5097/Chaol/DVQLS/DVQLS
+CONDA_ENV=/global/cfs/cdirs/m5097/Chaol/DVQLS/.conda
 
 CASE=tridiagonal
 SIZE=10
@@ -36,8 +36,8 @@ for i in "${!TOLS[@]}"; do
 #SBATCH -q regular
 #SBATCH -A m5097
 #SBATCH -t 1:00:00
-#SBATCH --job-name=vqls_weak_t${SAFE_TOL}
-#SBATCH --output=vqls_weak_t${SAFE_TOL}_%j.out
+#SBATCH --job-name=dvqls_weak_t${SAFE_TOL}
+#SBATCH --output=dvqls_weak_t${SAFE_TOL}_%j.out
 
 set -euo pipefail
 module load conda cudatoolkit
@@ -47,7 +47,7 @@ cd "${RELEASE_DIR}"
 python generate_lcu.py --case ${CASE} --size ${SIZE} --tol ${TOL}
 
 srun --ntasks-per-node=16 --gpu-bind=none \
-    python -u run_vqls.py --case ${CASE} --size ${SIZE} --tol ${TOL} \
+    python -u run_dvqls.py --case ${CASE} --size ${SIZE} --tol ${TOL} \
         --backend dense --maxiter ${MAXITER}
 EOF
     echo "submitted: tol=${TOL} on ${N} node(s)"

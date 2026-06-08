@@ -3,7 +3,7 @@
     A = sum_k coeffs[k] * P_k,
 
 where each ``P_k`` is a tensor product of Pauli operators (a "Pauli string"
-like ``"IXYZ"``). VQLS needs A in this form so the controlled-A in the
+like ``"IXYZ"``). DVQLS needs A in this form so the controlled-A in the
 Hadamard test reduces to controlled Paulis.
 
 The decomposition uses a Fast Walsh-Hadamard Transform (FWHT) over the diagonals

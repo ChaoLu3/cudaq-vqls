@@ -3,10 +3,10 @@
 Two problem families are provided:
 
 * ``tridiagonal``  : a symmetric tridiagonal Toeplitz matrix (diag 1, off-diag -1/3),
-  a standard, well-conditioned VQLS benchmark. ``b = e_0`` (first basis state).
+  a standard, well-conditioned DVQLS benchmark. ``b = e_0`` (first basis state).
 * ``hele-shaw``    : the finite-difference operator of 2D Hele-Shaw (Stokes) flow,
   for either the ``pressure`` or ``velocity`` field. The raw operator is padded to
-  a power-of-two size and symmetrized to a Hermitian system (required by VQLS).
+  a power-of-two size and symmetrized to a Hermitian system (required by DVQLS).
 """
 
 import math
@@ -176,7 +176,7 @@ def hele_shaw_system(nx, ny, var="velocity"):
     """Return (A, b) for the 2D Hele-Shaw problem on an ``nx`` x ``ny`` grid.
 
     ``var`` selects the field: ``"pressure"`` or ``"velocity"``. The operator is
-    padded to a power-of-two size and symmetrized so VQLS can solve it.
+    padded to a power-of-two size and symmetrized so DVQLS can solve it.
     Requires ``ny >= 3`` for the 2nd-order stencil in y.
     """
     if ny < 3 and nx > 2:

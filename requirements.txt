@@ -1,4 +1,4 @@
-# VQLS-CUDAQ dependencies.
+# DVQLS dependencies.
 # On NERSC Perlmutter, install into a conda env (Python 3.12) after
 # `module load cudatoolkit`. cudaq ships the GPU (nvidia/mqpu) simulators.
 cudaq==0.12.0

@@ -17,10 +17,11 @@ optimized so that `A|x⟩ ∝ |b⟩`.
 
 ## How DVQLS works here
 
-- DVQLS minimizes a cost that is zero when the prepared state `|x(θ)⟩ = V(θ)|0⟩`
+DVQLS minimizes a cost that is zero when the prepared state `|x(θ)⟩ = V(θ)|0⟩`
 satisfies `A|x⟩ ∝ |b⟩`:
 
-- $$ C_L(\theta)
+
+$$ C_L(\theta)
 =
 1 - \frac{1}{n}
 \sum_{j=1}^{n}

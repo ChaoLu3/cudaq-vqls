@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-"""Generate LCU datasets for the VQLS solver.
+"""Generate LCU datasets for the DVQLS solver.
 
 Builds the linear system A x = b for a problem case, decomposes A into a Linear
 Combination of Unitaries (Pauli strings) via FWHT, verifies the decomposition,
-and writes a JSON dataset that ``run_vqls.py`` consumes.
+and writes a JSON dataset that ``run_dvqls.py`` consumes.
 
 Examples
 --------
@@ -27,7 +27,7 @@ import time
 
 import numpy as np
 
-from vqls import lcu, problems
+from dvqls import lcu, problems
 
 
 def _parse_sizes(text):
@@ -61,7 +61,7 @@ def generate_one(case, size, var, tol, data_dir, verify=True):
           + ("  (Hermitian A -> real coeffs)" if imag < 1e-9 else "  (complex coeffs)"))
 
     # Coefficients are complex in general; JSON has no complex type, so store each
-    # as an [real, imag] pair. run_vqls.py reconstructs complex from these.
+    # as an [real, imag] pair. run_dvqls.py reconstructs complex from these.
     data = {
         "case": case,
         "tol": tol,
